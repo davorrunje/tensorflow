@@ -120,10 +120,10 @@ py_library(
         "//tensorflow/python:framework_ops",
         "//tensorflow/python:nn",
         "//tensorflow/python:partitioned_variables",
-        "//tensorflow/python:state_ops",
         "//tensorflow/python:summary",
         "//tensorflow/python:training",
         "//tensorflow/python:variable_scope",
+        "//tensorflow/python:state_ops",
         "@six_archive//:six",
     ],
 )
