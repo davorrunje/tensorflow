@@ -22,7 +22,7 @@ import six
 
 from tensorflow.python.estimator import estimator
 from tensorflow.python.estimator import model_fn
-from tensorflow.python.feature_column import feature_column as feature_column_lib #pylint: disable=line-too-long
+from tensorflow.python.feature_column import feature_column as feature_column_lib
 from tensorflow.python.layers import core as core_layers
 from tensorflow.python.ops import init_ops
 from tensorflow.python.ops import nn
@@ -39,8 +39,8 @@ from tensorflow.python.estimator.canned.utils import add_layer_summary
 _LEARNING_RATE = 0.05
 
 
-def _dnn_logit_fn_builder(units, hidden_units, feature_columns,
-                          activation_fn=nn.relu, dropout=None):
+def _dnn_logit_fn_builder(units, hidden_units, feature_columns, activation_fn=nn.relu,
+                          dropout=None):
   """Function builder for a dnn logit_fn.
 
   Args:
@@ -253,15 +253,15 @@ class DNNClassifier(_DNN):
         label_vocabulary=label_vocabulary)
 
     super(DNNClassifier, self).__init__(
-        head=head,
-        hidden_units=hidden_units,
-        feature_columns=feature_columns,
-        model_dir=model_dir,
-        optimizer=optimizer,
-        activation_fn=activation_fn,
-        dropout=dropout,
-        input_layer_partitioner=input_layer_partitioner,
-        config=config)
+      head=head,
+      hidden_units=hidden_units,
+      feature_columns=feature_columns,
+      model_dir=model_dir,
+      optimizer=optimizer,
+      activation_fn=activation_fn,
+      dropout=dropout,
+      input_layer_partitioner=input_layer_partitioner,
+      config=config)
 
 class DNNRegressor(_DNN):
   """A regressor for TensorFlow DNN models.
@@ -369,12 +369,13 @@ class DNNRegressor(_DNN):
         weight_column=weight_column)
 
     super(DNNRegressor, self).__init__(
-        head=head,
-        hidden_units=hidden_units,
-        feature_columns=feature_columns,
-        model_dir=model_dir,
-        optimizer=optimizer,
-        activation_fn=activation_fn,
-        dropout=dropout,
-        input_layer_partitioner=input_layer_partitioner,
-        config=config)
+      head=head,
+      hidden_units=hidden_units,
+      feature_columns=feature_columns,
+      model_dir=model_dir,
+      optimizer=optimizer,
+      activation_fn=activation_fn,
+      dropout=dropout,
+      input_layer_partitioner=input_layer_partitioner,
+      config=config)
+

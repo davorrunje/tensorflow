@@ -28,7 +28,7 @@ from tensorflow.core.example import example_pb2
 from tensorflow.core.example import feature_pb2
 from tensorflow.python.estimator.canned import dnn
 from tensorflow.python.estimator.canned import dnn_linear_combined
-from tensorflow.python.estimator.canned.utils import common_combined_model_fn
+from tensorflow.python.estimator.canned.utils import common_model_fn
 from tensorflow.python.estimator.canned import dnn_testing_utils
 from tensorflow.python.estimator.canned import linear_testing_utils
 from tensorflow.python.estimator.canned import prediction_keys
@@ -79,7 +79,7 @@ class DNNOnlyModelFnTest(dnn_testing_utils.BaseDNNModelFnTest, test.TestCase):
                          input_layer_partitioner=None,
                          config=None):
 
-    return common_combined_model_fn(
+    return common_model_fn(
         name=name,
         features=features,
         labels=labels,

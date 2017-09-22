@@ -23,7 +23,7 @@ import math
 import six
 
 from tensorflow.python.estimator import estimator
-from tensorflow.python.estimator.canned.utils import common_combined_model_fn
+from tensorflow.python.estimator.canned.utils import common_model_fn
 from tensorflow.python.estimator.canned.utils import regression_head
 from tensorflow.python.estimator.canned.utils import classifier_head
 from tensorflow.python.estimator.canned import dnn
@@ -64,9 +64,7 @@ def _linear_learning_rate(num_linear_feature_columns):
     return min(_LINEAR_LEARNING_RATE, default_learning_rate)
 
 class _DNNLinearCombined(estimator.Estimator):
-  """The common functionality for TensorFlow Linear and DNN combined
-     classificator and regressor
-  """
+  """The common functionality for TensorFlow Linear and DNN joined classificator and regressor"""
   def __init__(self,
                head,
                model_dir=None,
@@ -103,7 +101,7 @@ class _DNNLinearCombined(estimator.Estimator):
       linear_learning_rate = _linear_learning_rate(len(linear_feature_columns))
 
     dnn_logit_fn, linear_logit_fn = None, None
-    if dnn_feature_columns:
+    if len(dnn_feature_columns):
       dnn_logit_fn = dnn._dnn_logit_fn_builder(  # pylint: disable=protected-access
           units=head.logits_dimension,
           hidden_units=dnn_hidden_units,
@@ -111,13 +109,13 @@ class _DNNLinearCombined(estimator.Estimator):
           activation_fn=dnn_activation_fn,
           dropout=dnn_dropout)
 
-    if linear_feature_columns:
+    if len(linear_feature_columns):
       linear_logit_fn = linear._linear_logit_fn_builder(  # pylint: disable=protected-access
           units=head.logits_dimension,
           feature_columns=linear_feature_columns)
 
     def _model_fn(features, labels, mode, config):
-      return common_combined_model_fn(
+      return common_model_fn(
           features=features,
           labels=labels,
           mode=mode,
@@ -395,8 +393,7 @@ class DNNLinearCombinedRegressor(_DNNLinearCombined):
       ValueError: If both linear_feature_columns and dnn_features_columns are
         empty at the same time.
     """
-    head = regression_head(label_dimension=label_dimension,
-                           weight_column=weight_column)
+    head = regression_head(label_dimension=label_dimension, weight_column=weight_column)
 
     super(DNNLinearCombinedRegressor, self).__init__(
         head=head,
