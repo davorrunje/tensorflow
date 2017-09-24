@@ -47,9 +47,9 @@ def _check_no_sync_replicas_optimizer(optimizer):
 
 def common_model_fn(
     features, labels, mode, head,
-    name, logit_fn, optimizer, learning_rate=None, input_layer_partitioner=None,
-    partitioner=None, config=None):
-  """Deep Neural Net and Linear combined model_fn.
+    name, logit_fn, optimizer, learning_rate=None,
+    input_layer_partitioner=None, partitioner=None, config=None):
+  """Common model function for DNN and Linear canned models.
 
   Args:
     features: dict of `Tensor`.
@@ -58,22 +58,64 @@ def common_model_fn(
     mode: Defines whether this is training, evaluation or prediction.
       See `ModeKeys`.
     head: A `Head` instance.
-    linear_feature_columns: An iterable containing all the feature columns used
-      by the Linear model.
-    linear_optimizer: string, `Optimizer` object, or callable that defines the
-      optimizer to use for training the Linear model. Defaults to the Ftrl
-      optimizer.
-    dnn_feature_columns: An iterable containing all the feature columns used by
-      the DNN model.
-    dnn_optimizer: string, `Optimizer` object, or callable that defines the
-      optimizer to use for training the DNN model. Defaults to the Adagrad
-      optimizer.
-    dnn_hidden_units: List of hidden units per DNN layer.
-    dnn_activation_fn: Activation function applied to each DNN layer. If `None`,
-      will use `tf.nn.relu`.
-    dnn_dropout: When not `None`, the probability we will drop out a given DNN
-      coordinate.
+    name: Name of the model.
+    logit_fn: Function with the following signature:
+      `logit_fn(features, mode, input_layer_partitioner)`.
+    learning_rate: Learning rate.
+    optimizer: string, `Optimizer` object, or callable that defines the
+      optimizer to use for training the model
     input_layer_partitioner: Partitioner for input layer.
+    partitioner: Partitioner of variables used by the linear model.
+    config: `RunConfig` object to configure the runtime settings.
+
+  Returns:
+    `ModelFnOps`
+
+  Raises:
+    ValueError: If `features` is not a dictionary of `Tensor`,
+     or `name` is not a string type.
+  """
+  if not isinstance(features, dict):
+    raise ValueError('features should be a dictionary of `Tensor`s. '
+                     'Given type: {}'.format(type(features)))
+
+  if not isinstance(name, six.string_types):
+    raise ValueError('Name must be a string type')
+
+  return common_combined_model_fn(
+    features=features,
+    labels=labels,
+    mode=mode,
+    head=head,
+    name=[name],
+    logit_fn=[logit_fn],
+    optimizer=[optimizer],
+    learning_rate=[learning_rate],
+    input_layer_partitioner=input_layer_partitioner,
+    partitioner=partitioner,
+    config=config)
+
+def common_combined_model_fn(
+    features, labels, mode, head,
+    name, logit_fn, optimizer, learning_rate=None, input_layer_partitioner=None,
+    partitioner=None, config=None):
+  """Common model function for DNN and Linear combined models.
+
+  Args:
+    features: dict of `Tensor`.
+    labels: `Tensor` of shape [batch_size, 1] or [batch_size] labels of dtype
+      `int32` or `int64` in the range `[0, n_classes)`.
+    mode: Defines whether this is training, evaluation or prediction.
+      See `ModeKeys`.
+    head: A `Head` instance.
+    name: A collection of strings used for variables scopes.
+    logit_fn: A collection of logit functions (e.g. DNN and/or Linear logit functions).
+    learning_rate: A collection of learning rates used by optimizers.
+    optimizer: A collection of:
+      string, `Optimizer` object, or callable that defines the
+      optimizer to use for training the model
+    input_layer_partitioner: Partitioner for input layer.
+    partitioner: Partitioner of variables used by the linear model.
     config: `RunConfig` object to configure the runtime settings.
 
   Returns:
@@ -89,7 +131,7 @@ def common_model_fn(
                      'Given type: {}'.format(type(features)))
 
   # if name is a string, then assume logit_fn, optimizer and learning_rate
-  # parameters not collections as well and convert everything to lists
+  # parameters are not collections as well and convert everything to lists
   if isinstance(name, six.string_types):
     name = [name]
     logit_fn = [logit_fn]
