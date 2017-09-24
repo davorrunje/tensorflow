@@ -40,10 +40,10 @@ def add_layer_summary(value, tag):
 def _check_no_sync_replicas_optimizer(optimizer):
   if isinstance(optimizer, sync_replicas_optimizer.SyncReplicasOptimizer):
     raise ValueError(
-      'SyncReplicasOptimizer does not support multi optimizers case. '
-      'Therefore, it is not supported in DNNLinearCombined model. '
-      'If you want to use this optimizer, please use either DNN or Linear '
-      'model.')
+        'SyncReplicasOptimizer does not support multi optimizers case. '
+        'Therefore, it is not supported in DNNLinearCombined model. '
+        'If you want to use this optimizer, please use either DNN or Linear '
+        'model.')
 
 def common_model_fn(
     features, labels, mode, head,
@@ -83,17 +83,17 @@ def common_model_fn(
     raise ValueError('Name must be a string type')
 
   return common_combined_model_fn(
-    features=features,
-    labels=labels,
-    mode=mode,
-    head=head,
-    name=[name],
-    logit_fn=[logit_fn],
-    optimizer=[optimizer],
-    learning_rate=[learning_rate],
-    input_layer_partitioner=input_layer_partitioner,
-    partitioner=partitioner,
-    config=config)
+      features=features,
+      labels=labels,
+      mode=mode,
+      head=head,
+      name=[name],
+      logit_fn=[logit_fn],
+      optimizer=[optimizer],
+      learning_rate=[learning_rate],
+      input_layer_partitioner=input_layer_partitioner,
+      partitioner=partitioner,
+      config=config)
 
 def common_combined_model_fn(
     features, labels, mode, head,
@@ -109,7 +109,8 @@ def common_combined_model_fn(
       See `ModeKeys`.
     head: A `Head` instance.
     name: A collection of strings used for variables scopes.
-    logit_fn: A collection of logit functions (e.g. DNN and/or Linear logit functions).
+    logit_fn: A collection of logit functions (e.g. DNN and/or Linear logit
+              functions).
     learning_rate: A collection of learning rates used by optimizers.
     optimizer: A collection of:
       string, `Optimizer` object, or callable that defines the
@@ -142,24 +143,27 @@ def common_combined_model_fn(
   # check if parameters have the same length (unless learning_rate is None)
   if not(len(name) == len(logit_fn) and
          len(logit_fn) == len(optimizer)):
-    raise ValueError('Parameters name, logit_fn and optimizer must have the same length. '
+    raise ValueError('Parameters name, logit_fn and optimizer must have the '
+                     'same length. '
                      'Given lengths: '
                      'len(name) = {}\n'
                      'len(logit_fn) = {}\n'
                      'len(optimizer) = {}\n'.
                      format(len(name), len(logit_fn), len(optimizer)))
 
-  # if learning_rate is None, make a list with None values because of zip function bellow
+  # if learning_rate is None, make a list with None values because of zip
+  # function bellow
   if learning_rate is None:
     learning_rate = [None] * len(name)
 
   if not(learning_rate is None or
          len(learning_rate) == len(optimizer)):
-    raise ValueError('When learning_rate parameter is given, its length must be equal to'
-                     'length of the optimizer parameter. '
+    raise ValueError('When learning_rate parameter is given, its length must '
+                     'be equal to length of the optimizer parameter. '
                      'Given lengths are\n'
                      'len(learning_rate) = {}\n'
-                     'len(optimizer) = {}\n'.format(len(learning_rate), len(optimizer)))
+                     'len(optimizer) = {}\n'.format(len(learning_rate),
+                                                    len(optimizer)))
 
   num_ps_replicas = config.num_ps_replicas if config else 0
 
@@ -169,29 +173,29 @@ def common_combined_model_fn(
           min_slice_size=64 << 20))
 
   input_layer_partitioner = input_layer_partitioner or (
-    partitioned_variables.min_max_variable_partitioner(
-      max_partitions=num_ps_replicas,
-      min_slice_size=64 << 20))
+      partitioned_variables.min_max_variable_partitioner(
+          max_partitions=num_ps_replicas,
+          min_slice_size=64 << 20))
 
   logits = None
   train_op_params = []
-  for parent_scope, logit_fn, optimizer, learning_rate in zip(name, logit_fn, optimizer, learning_rate):
-    if logit_fn:
+  for scope, log_fn, opt, lr in zip(name, logit_fn, optimizer, learning_rate):
+    if log_fn:
       # create optimizer and check for compatibility
-      optimizer = get_optimizer_instance(optimizer, learning_rate=learning_rate)
-      _check_no_sync_replicas_optimizer(optimizer)
+      opt = get_optimizer_instance(opt, learning_rate=lr)
+      _check_no_sync_replicas_optimizer(opt)
 
       with variable_scope.variable_scope(
-          parent_scope,
+          scope,
           values=tuple(six.itervalues(features)),
           partitioner=partitioner):
 
-        cur_logits = logit_fn(
+        cur_logits = log_fn(
             features=features,
             mode=mode,
             input_layer_partitioner=input_layer_partitioner)
         logits = logits + cur_logits if logits is not None else cur_logits
-        train_op_params.append((optimizer, parent_scope))
+        train_op_params.append((opt, scope))
 
   if logits is None:
     raise ValueError('At least one item in logit_fns must be non-None.')
@@ -228,17 +232,30 @@ def common_combined_model_fn(
 
 
 def classifier_head(n_classes, weight_column, label_vocabulary):
+  """
+  Classifier head
+  :param n_classes: number of classes
+  :param weight_column: weights
+  :param label_vocabulary: label vocabulary
+  :return: classifier head
+  """
   if n_classes == 2:
     head = head_lib._binary_logistic_head_with_sigmoid_cross_entropy_loss(  # pylint: disable=protected-access
-      weight_column=weight_column,
-      label_vocabulary=label_vocabulary)
+        weight_column=weight_column,
+        label_vocabulary=label_vocabulary)
   else:
     head = head_lib._multi_class_head_with_softmax_cross_entropy_loss(  # pylint: disable=protected-access
-      n_classes, weight_column=weight_column,
-      label_vocabulary=label_vocabulary)
+        n_classes, weight_column=weight_column,
+        label_vocabulary=label_vocabulary)
 
   return head
 
 def regression_head(label_dimension, weight_column):
+  """
+  Regression head
+  :param label_dimension: label dimensions
+  :param weight_column:  weights
+  :return: regression head
+  """
   return head_lib._regression_head_with_mean_squared_error_loss(  # pylint: disable=protected-access
-    label_dimension=label_dimension, weight_column=weight_column)
+      label_dimension=label_dimension, weight_column=weight_column)
