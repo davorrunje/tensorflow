@@ -19,8 +19,7 @@ from __future__ import division
 from __future__ import print_function
 
 from tensorflow.python.estimator import estimator
-from tensorflow.python.feature_column import feature_column as feature_column_lib
-
+from tensorflow.python.feature_column import feature_column as feature_column_lib #pylint: disable=line-too-long
 from tensorflow.python.estimator.canned.utils import common_model_fn
 from tensorflow.python.estimator.canned.utils import classifier_head
 from tensorflow.python.estimator.canned.utils import regression_head
@@ -43,7 +42,7 @@ def _linear_logit_fn_builder(units, feature_columns):
 
   """
 
-  def linear_logit_fn(features, mode=None, input_layer_partitioner=None):
+  def linear_logit_fn(features, mode=None, input_layer_partitioner=None): #pylint: disable=unused-argument
     """Linear model logit_fn.
 
     Args:
@@ -203,12 +202,12 @@ class LinearClassifier(_Linear):
         label_vocabulary=label_vocabulary)
 
     super(LinearClassifier, self).__init__(
-      head=head,
-      feature_columns=feature_columns,
-      model_dir=model_dir,
-      optimizer=optimizer,
-      config=config,
-      partitioner=partitioner)
+        head=head,
+        feature_columns=feature_columns,
+        model_dir=model_dir,
+        optimizer=optimizer,
+        config=config,
+        partitioner=partitioner)
 
 
 class LinearRegressor(_Linear):
@@ -292,9 +291,9 @@ class LinearRegressor(_Linear):
         weight_column=weight_column)
 
     super(LinearRegressor, self).__init__(
-      head=head,
-      feature_columns=feature_columns,
-      model_dir=model_dir,
-      optimizer=optimizer,
-      config=config,
-      partitioner=partitioner)
+        head=head,
+        feature_columns=feature_columns,
+        model_dir=model_dir,
+        optimizer=optimizer,
+        config=config,
+        partitioner=partitioner)
