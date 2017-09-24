@@ -232,12 +232,12 @@ class BaseDNNModelFnTest(object):
       logit_fn = self._dnn_logit_fn_builder(
           units=head.logits_dimension,
           hidden_units=hidden_units,
-          feature_columns= [feature_column.numeric_column(
+          feature_columns=[feature_column.numeric_column(
               'age', shape=np.array(inputs).shape[1:])])
 
       estimator_spec = self._dnn_model_fn(
-        name='dnn',
-        features={'age': constant_op.constant(inputs)},
+          name='dnn',
+          features={'age': constant_op.constant(inputs)},
           labels=constant_op.constant([[1]]),
           mode=mode,
           head=head,
@@ -470,10 +470,10 @@ class BaseDNNModelFnTest(object):
       logit_fn = self._dnn_logit_fn_builder(
           units=head.logits_dimension,
           hidden_units=hidden_units,
-        feature_columns=[
-           feature_column.numeric_column(
-                'age', shape=np.array(inputs).shape[1:])
-        ])
+          feature_columns=[
+              feature_column.numeric_column(
+                  'age', shape=np.array(inputs).shape[1:])
+          ])
 
       with self.assertRaisesRegexp(ValueError, 'features should be a dict'):
         self._dnn_model_fn(
@@ -523,7 +523,9 @@ class BaseDNNLogitFnTest(object):
             activation_fn=nn.relu,
             dropout=None)
         logits = logit_fn(
-            features={'age': constant_op.constant(inputs)}, mode=mode, input_layer_partitioner=input_layer_partitioner)
+            features={'age': constant_op.constant(inputs)},
+            mode=mode,
+            input_layer_partitioner=input_layer_partitioner)
         with monitored_session.MonitoredTrainingSession(
             checkpoint_dir=self._model_dir) as sess:
           self.assertAllClose(expected_logits, sess.run(logits))
@@ -708,7 +710,7 @@ class BaseDNNLogitFnTest(object):
                   'height': constant_op.constant(inputs[1])
               },
               mode=mode,
-              input_layer_partitioner = input_layer_partitioner)
+              input_layer_partitioner=input_layer_partitioner)
           with monitored_session.MonitoredTrainingSession(
               checkpoint_dir=self._model_dir) as sess:
             self.assertAllClose(expected_logits, sess.run(logits))
@@ -1169,8 +1171,9 @@ def _assert_checkpoint(
 
   # Hidden layer weights.
   prev_layer_units = input_units
-  for i in range(len(hidden_units)):
-    layer_units = hidden_units[i]
+#  for i in range(len(hidden_units)):
+  #  layer_units = hidden_units[i]
+  for i, layer_units in enumerate(hidden_units):
     testcase.assertAllEqual(
         (prev_layer_units, layer_units),
         shapes[HIDDEN_WEIGHTS_NAME_PATTERN % i])
